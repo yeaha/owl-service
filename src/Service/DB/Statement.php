@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Owl\Service\DB;
 
 class Statement
@@ -27,7 +29,7 @@ class Statement
      *
      * @return array
      */
-    public function getRow()
+    public function getRow(): array
     {
         return $this->statement->fetch();
     }
@@ -39,7 +41,7 @@ class Statement
      *
      * @return mixed
      */
-    public function getCol($col_number = 0)
+    public function getCol(int $col_number = 0)
     {
         return $this->statement->fetch(\PDO::FETCH_COLUMN, $col_number);
     }
@@ -51,7 +53,7 @@ class Statement
      *
      * @return array
      */
-    public function getCols($col_number = 0)
+    public function getCols(int $col_number = 0): array
     {
         return $this->statement->fetchAll(\PDO::FETCH_COLUMN, $col_number);
     }
@@ -63,7 +65,7 @@ class Statement
      *
      * @return array
      */
-    public function getAll($column = null)
+    public function getAll(string $column = null): array
     {
         if (!$column) {
             return $this->fetchAll();

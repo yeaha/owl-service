@@ -1,7 +1,4 @@
 <?php
-
-namespace Owl\Service;
-
 /**
  * @example
  * $container = \Owl\Service\Container::getInstance();
@@ -36,6 +33,10 @@ namespace Owl\Service;
  * $master = $container->get('mysql.master');
  * $slave = $container->get('mysql.slave', 123);
  */
+declare(strict_types=1);
+
+namespace Owl\Service;
+
 class Container extends \Owl\Container
 {
     use \Owl\Traits\Singleton;
@@ -51,14 +52,14 @@ class Container extends \Owl\Container
         return $this;
     }
 
-    public function setRouter($id, \Closure $handler)
+    public function setRouter(string $id, callable $handler)
     {
         $this->router[$id] = $handler->bindTo($this);
 
         return $this;
     }
 
-    public function get($id)
+    public function get(string $id)
     {
         if ($this->has($id)) {
             return parent::get($id);
@@ -89,7 +90,7 @@ class Container extends \Owl\Container
         parent::refresh();
     }
 
-    protected function setService($id, array $options)
+    protected function setService(string $id, array $options)
     {
         $this->set($id, function () use ($options) {
             if (!isset($options['class'])) {

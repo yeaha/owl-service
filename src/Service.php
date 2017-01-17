@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Owl;
 
@@ -13,14 +14,10 @@ abstract class Service
         $this->config = $config;
     }
 
-    public function getConfig($key = null)
+    public function getConfig(string $key = '')
     {
-        if ($key === null) {
-            return $this->config;
-        }
-
-        return isset($this->config[$key])
-             ? $this->config[$key]
-             : false;
+        return ($key === '')
+             ? $this->config
+             : $this->config[$key] ?? false;
     }
 }

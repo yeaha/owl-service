@@ -1,9 +1,11 @@
 <?php
+declare(strict_types=1);
+
 namespace Owl\Service\DB\Pgsql;
 
 class Table extends \Owl\Service\DB\Table
 {
-    protected function listColumns()
+    protected function listColumns(): array
     {
         $sql = <<< 'EOF'
 with primary_keys as (
@@ -77,7 +79,7 @@ EOF;
         return $columns;
     }
 
-    protected function listIndexes()
+    protected function listIndexes(): array
     {
         $adapter = $this->adapter;
         list($scheme, $table) = $adapter->parseTableName($this->table_name);
@@ -127,7 +129,7 @@ EOF;
         return array_values($indexes);
     }
 
-    protected function listForeignKeys()
+    protected function listForeignKeys(): array
     {
         // http://stackoverflow.com/questions/1152260/postgres-sql-to-list-table-foreign-keys
         $sql = <<< 'EOF'

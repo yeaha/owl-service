@@ -1,11 +1,4 @@
 <?php
-
-namespace Owl\Service;
-
-if (!extension_loaded('memcached')) {
-    throw new \RuntimeException('Require "memcached" extension!');
-}
-
 /**
  * @example
  * $config = [
@@ -21,6 +14,14 @@ if (!extension_loaded('memcached')) {
  *
  * $memcached = new \Owl\Service\Memcached($config);
  */
+declare(strict_types=1);
+
+namespace Owl\Service;
+
+if (!extension_loaded('memcached')) {
+    throw new \RuntimeException('Require "memcached" extension!');
+}
+
 class Memcached extends \Owl\Service
 {
     protected $memcached;

@@ -1,6 +1,8 @@
 <?php
 namespace Owl\Service\DB\Pgsql;
 
+use Owl\Service\DB\Expr;
+
 if (!extension_loaded('pdo_pgsql')) {
     throw new \Exception('Require "pdo_pgsql" extension!');
 }
@@ -9,7 +11,7 @@ class Adapter extends \Owl\Service\DB\Adapter
 {
     protected $identifier_symbol = '"';
 
-    public function lastID($table = null, $column = null)
+    public function lastID(string $table = null, string $column = null)
     {
         $sql = ($table && $column)
              ? sprintf("SELECT CURRVAL('%s')", $this->sequenceName($table, $column))
@@ -18,14 +20,14 @@ class Adapter extends \Owl\Service\DB\Adapter
         return $this->execute($sql)->getCol();
     }
 
-    public function nextID($table, $column)
+    public function nextID(string $table, string $column)
     {
         $sql = sprintf("SELECT NEXTVAL('%s')", $this->sequenceName($table, $column));
 
         return $this->execute($sql)->getCol();
     }
 
-    public function getTables()
+    public function getTables(): array
     {
         $select = $this->select('information_schema.tables')
                        ->setColumns('table_schema', 'table_name')
@@ -39,7 +41,7 @@ class Adapter extends \Owl\Service\DB\Adapter
         return $tables;
     }
 
-    public function parseTableName($table)
+    public function parseTableName(string $table): array
     {
         $table = str_replace('"', '', $table);
         $pos = strpos($table, '.');
@@ -53,7 +55,7 @@ class Adapter extends \Owl\Service\DB\Adapter
         return ['public', $table];
     }
 
-    protected function sequenceName($table, $column)
+    protected function sequenceName(string $table, string $column): Expr
     {
         list($schema, $table) = $this->parseTableName($table);
 

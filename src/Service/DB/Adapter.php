@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Owl\Service\DB;
 
 use Owl\Logger;
@@ -12,12 +14,12 @@ abstract class Adapter extends \Owl\Service
     protected $savepoints = [];
     protected $in_transaction = false;
 
-    abstract public function lastID($table = null, $column = null);
+    abstract public function lastID(string $table = null, string $column = null);
 
     /**
      * @return array
      */
-    abstract public function getTables();
+    abstract public function getTables(): array;
 
     public function __construct(array $config = [])
     {
@@ -42,16 +44,16 @@ abstract class Adapter extends \Owl\Service
     public function __call($method, array $args)
     {
         return $args
-        ? call_user_func_array([$this->connect(), $method], $args)
-        : $this->connect()->$method();
+             ? call_user_func_array([$this->connect(), $method], $args)
+             : $this->connect()->$method();
     }
 
-    public function isConnected()
+    public function isConnected(): bool
     {
         return $this->handler instanceof \PDO;
     }
 
-    public function connect()
+    public function connect(): \PDO
     {
         if ($this->isConnected()) {
             return $this->handler;
@@ -92,7 +94,7 @@ abstract class Adapter extends \Owl\Service
         return $this;
     }
 
-    public function begin()
+    public function begin(): bool
     {
         if ($this->in_transaction) {
             if (!$this->support_savepoint) {
@@ -110,7 +112,7 @@ abstract class Adapter extends \Owl\Service
         return true;
     }
 
-    public function commit()
+    public function commit(): bool
     {
         if ($this->in_transaction) {
             if ($this->savepoints) {
@@ -125,7 +127,7 @@ abstract class Adapter extends \Owl\Service
         return true;
     }
 
-    public function rollback()
+    public function rollback(): bool
     {
         if ($this->in_transaction) {
             if ($this->savepoints) {
@@ -148,12 +150,12 @@ abstract class Adapter extends \Owl\Service
         }
     }
 
-    public function inTransaction()
+    public function inTransaction(): bool
     {
         return $this->in_transaction;
     }
 
-    public function execute($sql, $params = null)
+    public function execute($sql, $params = null): Statement
     {
         $params = $params === null
         ? []
@@ -179,7 +181,7 @@ abstract class Adapter extends \Owl\Service
         return Statement::factory($sth);
     }
 
-    public function prepare()
+    public function prepare(): Statement
     {
         $handler = $this->connect();
         $statement = call_user_func_array([$handler, 'prepare'], func_get_args());
@@ -229,29 +231,29 @@ abstract class Adapter extends \Owl\Service
         return new Expr(implode('.', $result));
     }
 
-    public function select($table)
+    public function select($table): Select
     {
-        return new \Owl\Service\DB\Select($this, $table);
+        return new Select($this, $table);
     }
 
     /**
      * @return \Owl\Service\DB\Table
      */
-    public function getTable($table_name)
+    public function getTable(string $table_name): Table
     {
         $class = str_replace('Adapter', 'Table', get_class($this));
 
         return new $class($this, $table_name);
     }
 
-    public function hasTable($table_name)
+    public function hasTable(string $table_name): bool
     {
         $table_name = str_replace($this->identifier_symbol, '', $table_name);
 
         return in_array($table_name, $this->getTables());
     }
 
-    public function insert($table, array $row)
+    public function insert(string $table, array $row): int
     {
         $params = [];
         foreach ($row as $value) {
@@ -265,11 +267,11 @@ abstract class Adapter extends \Owl\Service
         return $this->execute($sth, $params)->rowCount();
     }
 
-    public function update($table, array $row, $where = null, $params = null)
+    public function update(string $table, array $row, string $where = null, $params = null): int
     {
         $where_params = ($where === null || $params === null)
-        ? []
-        : is_array($params) ? $params : array_slice(func_get_args(), 3);
+                      ? []
+                      : is_array($params) ? $params : array_slice(func_get_args(), 3);
 
         $params = [];
         foreach ($row as $value) {
@@ -287,18 +289,18 @@ abstract class Adapter extends \Owl\Service
         return $this->execute($sth, $params)->rowCount();
     }
 
-    public function delete($table, $where = null, $params = null)
+    public function delete(string $table, string $where = null, $params = null): int
     {
         $params = ($where === null || $params === null)
-        ? []
-        : is_array($params) ? $params : array_slice(func_get_args(), 2);
+                ? []
+                : is_array($params) ? $params : array_slice(func_get_args(), 2);
 
         $sth = $this->prepareDelete($table, $where);
 
         return $this->execute($sth, $params)->rowCount();
     }
 
-    public function prepareInsert($table, array $columns)
+    public function prepareInsert(string $table, array $columns): Statement
     {
         $values = array_values($columns);
 
@@ -325,7 +327,7 @@ abstract class Adapter extends \Owl\Service
         return $this->prepare($sql);
     }
 
-    public function prepareUpdate($table, array $columns, $where = null)
+    public function prepareUpdate(string $table, array $columns, string $where = null): Statement
     {
         $only_column = (array_values($columns) === $columns);
 
@@ -347,7 +349,7 @@ abstract class Adapter extends \Owl\Service
         return $this->prepare($sql);
     }
 
-    public function prepareDelete($table, $where = null)
+    public function prepareDelete(string $table, string $where = null): Statement
     {
         $table = $this->quoteIdentifier($table);
 

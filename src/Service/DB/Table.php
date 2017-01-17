@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Owl\Service\DB;
 
 abstract class Table
@@ -27,7 +29,7 @@ abstract class Table
      *     ...
      * ]
      */
-    abstract protected function listColumns();
+    abstract protected function listColumns(): array;
 
     /**
      * @return array
@@ -42,7 +44,7 @@ abstract class Table
      *     ...
      * ]
      */
-    abstract protected function listIndexes();
+    abstract protected function listIndexes(): array;
 
     /**
      * @return array
@@ -58,9 +60,9 @@ abstract class Table
      *     ],
      * ]
      */
-    abstract protected function listForeignKeys();
+    abstract protected function listForeignKeys(): array;
 
-    public function __construct(Adapter $adapter, $table_name)
+    public function __construct(Adapter $adapter, string $table_name)
     {
         $this->adapter = $adapter;
         $this->table_name = $table_name;
@@ -83,7 +85,7 @@ abstract class Table
      *
      * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->table_name;
     }
@@ -93,7 +95,7 @@ abstract class Table
      *
      * @return \Owl\Service\DB\Adapter
      */
-    public function getAdapter()
+    public function getAdapter(): Adapter
     {
         return $this->adapter;
     }
@@ -103,7 +105,7 @@ abstract class Table
      *
      * @return array
      */
-    public function getColumns()
+    public function getColumns(): array
     {
         if ($this->columns === null) {
             $this->columns = $this->listColumns();
@@ -117,11 +119,11 @@ abstract class Table
      *
      * @return array
      */
-    public function getColumn($column_name)
+    public function getColumn(string $column_name): array
     {
         $columns = $this->getColumns();
 
-        return isset($columns[$column_name]) ? $columns[$column_name] : [];
+        return $columns[$column_name] ?? [];
     }
 
     /**
@@ -129,7 +131,7 @@ abstract class Table
      *
      * @return array
      */
-    public function getIndexes()
+    public function getIndexes(): array
     {
         if ($this->indexes === null) {
             $this->indexes = $this->listIndexes();
@@ -145,7 +147,7 @@ abstract class Table
      *
      * @return bool
      */
-    public function hasColumn($column_name)
+    public function hasColumn(string $column_name): bool
     {
         $columns = $this->getColumns();
 
@@ -159,7 +161,7 @@ abstract class Table
      *
      * @return bool
      */
-    public function hasIndex($index_name)
+    public function hasIndex(string $index_name): bool
     {
         foreach ($this->getIndexes() as $index) {
             if ($index['name'] === $index_name) {
@@ -177,7 +179,7 @@ abstract class Table
      *
      * @return array
      */
-    public function getForeignKeys()
+    public function getForeignKeys(): array
     {
         if ($this->foreign_keys === null) {
             $this->foreign_keys = $this->listForeignKeys();
@@ -191,7 +193,7 @@ abstract class Table
      *
      * @return array
      */
-    public function getReferenceTables()
+    public function getReferenceTables(): array
     {
         $tables = [];
 
@@ -211,7 +213,7 @@ abstract class Table
      *
      * @return array
      */
-    public function getIndexesOfColumn($column_name)
+    public function getIndexesOfColumn(string $column_name): array
     {
         $result = [];
 
@@ -229,7 +231,7 @@ abstract class Table
      *
      * @return \Owl\Service\DB\Select
      */
-    public function select()
+    public function select(): Select
     {
         return $this->adapter->select($this->table_name);
     }
@@ -241,7 +243,7 @@ abstract class Table
      *
      * @return int
      */
-    public function insert(array $row)
+    public function insert(array $row): int
     {
         return $this->adapter->insert($this->table_name, $row);
     }
@@ -256,7 +258,7 @@ abstract class Table
      *
      * @return int
      */
-    public function update(array $row/*, $where = null, $parameters = null*/)
+    public function update(array $row, string $where = null, $parameters = null): int
     {
         $args = func_get_args();
         array_unshift($args, $this->table_name);
@@ -272,7 +274,7 @@ abstract class Table
      *
      * @return int
      */
-    public function delete(/*$where = null, $parameters = null*/)
+    public function delete(string $where = null, $parameters = null): int
     {
         $args = func_get_args();
         array_unshift($args, $this->table_name);

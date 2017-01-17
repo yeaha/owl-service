@@ -1,13 +1,4 @@
 <?php
-namespace Owl\Service;
-
-use Owl\Logger;
-
-// https://github.com/nrk/predis
-if (!class_exists('\Predis\Client')) {
-    throw new \Exception('Require Predis library');
-}
-
 /**
  * @example
  * $parameters = [
@@ -25,6 +16,17 @@ if (!class_exists('\Predis\Client')) {
  *
  * $redis = new \Owl\Service\Predis($parameters, $options);
  */
+declare(strict_types=1);
+
+namespace Owl\Service;
+
+use Owl\Logger;
+
+// https://github.com/nrk/predis
+if (!class_exists('\Predis\Client')) {
+    throw new \Exception('Require Predis library');
+}
+
 class Predis extends \Owl\Service
 {
     protected $client;
@@ -51,7 +53,7 @@ class Predis extends \Owl\Service
         return $args ? call_user_func_array([$client, $method], $args) : $client->$method();
     }
 
-    public function connect()
+    public function connect(): \Predis\Client
     {
         if (!$this->client || !$this->client->isConnected()) {
             $parameters = $this->getConfig('parameters');
@@ -99,7 +101,7 @@ class Predis extends \Owl\Service
         return $this->connect()->transaction();
     }
 
-    public function hMGet($key, array $fields)
+    public function hMGet(string $key, array $fields): array
     {
         $redis = $this->connect();
 

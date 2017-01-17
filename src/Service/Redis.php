@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Owl\Service;
 
@@ -46,7 +47,7 @@ class Redis extends \Owl\Service
              : $this->connect()->$fn();
     }
 
-    public function connect()
+    public function connect(): \Redis
     {
         if ($this->handler) {
             return $this->handler;
